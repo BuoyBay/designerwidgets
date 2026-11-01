@@ -1,0 +1,180 @@
+Import layoutkit.LayoutCatalog
+
+Private Sub PaintBadge(g As IGraphics, x As Double, y As Double, width As Double, height As Double, tone As String, selected As Boolean)
+    Dim fill As Color = Color.RGB(0.15, 0.55, 0.38)
+    If tone = "alert" Then fill = Color.RGB(0.8, 0.3, 0.12)
+    g.FillRoundedRect(x, y, width, height, 8.0, fill)
+    g.DrawString("Status: " + tone, x + 10.0, y + 23.0, "", 13.0, Color.White)
+    If selected Then g.StrokeRect(x, y, width, height, 2.0, Color.Black)
+End Sub
+
+' A runtime control; source loading and catalog registration never instantiate it.
+@ControlSize(180, 36)
+@ControlIcon("pulse")
+Public Class StatusBadge Inherits Canvas
+    Public Shared Property ConstructorCalls As Integer = 0
+    Public Property Tone As String = "calm"
+    Public Sub Constructor()
+        Super.Constructor()
+        StatusBadge.ConstructorCalls += 1
+    End Sub
+    Handle Paint(g As Graphics)
+        PaintBadge(g, 0.0, 0.0, g.Width, g.Height, Me.Tone, False)
+    End Handle
+End Class
+
+Public Class StatusBadgeRenderer Implements LayoutRenderer
+    Public Function RendererId() As String
+        Return "designerwidgets.status-badge.v1"
+    End Function
+    Public Sub Paint(g As IGraphics, x As Double, y As Double, width As Double, height As Double, values As JSONItem, selected As Boolean)
+        PaintBadge(g, x, y, width, height, Me.ToneFor(values), selected)
+    End Sub
+
+    ' The painted tone: "calm", "alert" or "expression" (a source value that is
+    ' not one of the two literals). The exact source assignment is in the
+    ' reserved $expressions object; the typed "Tone" key is only a literal or the
+    ' descriptor default, and is absent when the source holds an expression.
+    Public Function ToneFor(values As JSONItem) As String
+        If values Is Nil Then Return "calm"
+        Dim expressions As JSONItem = values.Value("$expressions")
+        If expressions IsNot Nil Then
+            If expressions.IsObject() And expressions.HasKey("Tone") Then
+                Dim raw As String = String.Trim(expressions.Value("Tone").AsString().Or(""))
+                If raw = "\"alert\"" Then Return "alert"
+                If raw = "\"calm\"" Then Return "calm"
+                Return "expression"
+            End If
+        End If
+        Dim literal As String = values.Value("Tone").AsString().Or("calm")
+        If literal = "alert" Or literal = "calm" Then Return literal
+        Return "expression"
+    End Function
+End Class
+
+''' Compiled palette icon: a calm-tone badge silhouette drawn with IGraphics vectors
+''' on the 24-unit glyph grid. Hosts that import this package get it through
+''' RegisterDesignerWidgets; data-only discovery uses the plugin.json icon instead.
+Public Class StatusBadgeIcon Implements LayoutIconPainter
+    Public Sub PaintIcon(g As IGraphics, x As Double, y As Double, size As Double, dark As Boolean)
+        If g Is Nil Or Not (size > 0.0) Then Return
+        Dim fill As Color = Color.RGB(0.06, 0.46, 0.43)
+        Dim mark As Color = Color.White
+        If dark Then
+            fill = Color.RGB(0.37, 0.82, 0.73)
+            mark = Color.RGB(0.08, 0.10, 0.12)
+        End If
+        Dim unit As Double = size / 24.0
+        g.FillRoundedRect(x + 2.0 * unit, y + 7.0 * unit, 20.0 * unit, 10.0 * unit, 5.0 * unit, fill)
+        g.BeginPath()
+        g.FillOval(x + 5.0 * unit, y + 10.0 * unit, 4.0 * unit, 4.0 * unit, mark)
+        g.FillRoundedRect(x + 11.0 * unit, y + 11.0 * unit, 8.0 * unit, 2.0 * unit, unit, mark)
+    End Sub
+End Class
+
+''' Nonvisual editor contract: unknown expressions and cancellation remain unchanged.
+Public Class BadgeToneEditor Implements LayoutPropertyEditor
+    Public Function EditorId() As String
+        Return "designerwidgets.StatusBadge.Tone"
+    End Function
+    Public Function EditExpression(currentExpression As String) As Optional Of String
+        Return None
+    End Function
+End Class
+
+Private Class ToneButton Inherits Button
+    Public Property CommitHost As LayoutPropertyEditorHost
+    Public Property Expression As String
+    Public Property Feedback As Label
+    Handle Action()
+        If Me.CommitHost Is Nil Then Return
+        If Me.CommitHost.CommitExpression(Me.Expression) Then
+            Me.Feedback.Text = "Tone committed"
+        Else
+            Me.Feedback.Text = "Rejected; select again"
+        End If
+    End Handle
+End Class
+
+Public Class BadgeToneViewFactory Implements LayoutPropertyViewFactory
+    Public Function EditorId() As String
+        Return "designerwidgets.StatusBadge.Tone"
+    End Function
+    Public Function CreateView(currentExpression As String, host As LayoutPropertyEditorHost) As View
+        Return New BadgeToneView(currentExpression, host)
+    End Function
+End Class
+
+Public Class BadgeToneView Inherits View Implements LayoutReusablePropertyViewV1
+    Private Property mCalm As ToneButton
+    Private Property mAlert As ToneButton
+    Private Property mFeedback As Label
+    Public Sub Constructor(currentExpression As String, host As LayoutPropertyEditorHost)
+        Super.Constructor()
+
+        Me.Move(0, 0, 240, 90)
+        Me.mFeedback = New Label()
+        Dim feedback As Label = Me.mFeedback
+        feedback.Text = currentExpression
+        feedback.Move(0, 0, 230, 24)
+        Me.AddSubview(feedback)
+        Me.mCalm = New ToneButton()
+        Dim calm As ToneButton = Me.mCalm
+        calm.Caption = "Calm"
+        calm.Expression = "\"calm\""
+        calm.CommitHost = host
+        calm.Feedback = feedback
+        calm.Move(0, 30, 108, 28)
+        Me.AddSubview(calm)
+        Me.mAlert = New ToneButton()
+        Dim alert As ToneButton = Me.mAlert
+        alert.Caption = "Alert"
+        alert.Expression = "\"alert\""
+        alert.CommitHost = host
+        alert.Feedback = feedback
+        alert.Move(116, 30, 108, 28)
+        Me.AddSubview(alert)
+    End Sub
+    Public Sub RebindProperty(currentExpression As String, host As LayoutPropertyEditorHost)
+        Me.mFeedback.Text = currentExpression
+        Me.mCalm.CommitHost = host
+        Me.mAlert.CommitHost = host
+    End Sub
+    Public Sub PerformChoice(tone As String)
+        If tone = "calm" Then Me.mCalm.PerformClick()
+        If tone = "alert" Then Me.mAlert.PerformClick()
+    End Sub
+End Class
+
+''' The executable host calls this explicitly, before loading source. The
+''' descriptor uses the same stable identity, source spelling, import and editor
+''' id as the package's plugin.json, so source resolves it only through
+''' `Import designerwidgets.DesignerWidgets` (a project's own StatusBadge class is
+''' never painted with this renderer) and a host that also loads the data-only
+''' descriptor keeps one palette entry. After discovery, this call only adds the
+''' compiled pieces that are still missing; if discovery runs after this call it
+''' reports the package's duplicate control symbol and loads nothing.
+Public Sub RegisterDesignerWidgets(catalog As LayoutCatalog)
+    Const Identity As String = "designerwidgets.StatusBadge"
+    Const ToneEditor As String = "designerwidgets.StatusBadge.Tone"
+    If catalog.Find(Identity) Is Nil Then
+        Dim badge As New LayoutControlDescriptor(Identity, "Status badge", "designerwidgets")
+        badge.Category = "Status"
+        badge.Description = "Rounded calm/alert status pill"
+        badge.DefaultWidth = 180
+        badge.DefaultHeight = 36
+        badge.Metadata.Value("sourceImport") = "designerwidgets.DesignerWidgets"
+        badge.Metadata.Value("sourceTypeName") = "StatusBadge"
+        Dim tone As New LayoutPropertyDescriptor("Tone", "string", "\"calm\"")
+        tone.DisplayName = "Badge tone"
+        tone.Category = "Appearance"
+        tone.EditorId = ToneEditor
+        tone.Options = ["\"calm\"", "\"alert\""]
+        badge.AddProperty(tone)
+        catalog.Register(badge)
+    End If
+    If catalog.RendererFor(Identity) Is Nil Then catalog.RegisterRenderer(Identity, New StatusBadgeRenderer())
+    If Not catalog.HasRegisteredIcon(Identity) Then catalog.RegisterIcon(Identity, New StatusBadgeIcon())
+    If catalog.EditorFor(ToneEditor) Is Nil Then catalog.RegisterEditor(New BadgeToneEditor())
+    If catalog.EditorViewFor(ToneEditor) Is Nil Then catalog.RegisterEditorView(New BadgeToneViewFactory())
+End Sub

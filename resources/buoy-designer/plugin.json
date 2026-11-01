@@ -1,0 +1,30 @@
+{
+  "schema": "buoy.designer.plugin",
+  "schemaVersion": 1,
+  "package": {"name": "designerwidgets", "version": "0.1.0", "provenance": "Buoy designerwidgets example package"},
+  "controls": [{
+    "typeName": "designerwidgets.StatusBadge",
+    "displayName": "Status badge",
+    "category": "Status",
+    "description": "Rounded calm/alert status pill",
+    "defaultWidth": 180,
+    "defaultHeight": 36,
+    "sourceImport": "designerwidgets.DesignerWidgets",
+    "icon": {"version": 1, "steps": [
+      {"op": "fillRoundedRect", "x": 2, "y": 7, "width": 20, "height": 10, "radius": 5, "color": [0.06, 0.46, 0.43], "darkColor": [0.37, 0.82, 0.73]},
+      {"op": "fillOval", "x": 5, "y": 10, "width": 4, "height": 4, "color": [1, 1, 1], "darkColor": [0.08, 0.1, 0.12]},
+      {"op": "fillRect", "x": 11, "y": 11, "width": 8, "height": 2, "color": [1, 1, 1], "darkColor": [0.08, 0.1, 0.12]}
+    ]},
+    "iconImage": "icons/status-badge.png",
+    "properties": [{
+      "name": "Tone", "displayName": "Badge tone", "kind": "string",
+      "defaultExpression": "\"calm\"", "options": ["\"calm\"", "\"alert\""],
+      "category": "Appearance", "editorId": "designerwidgets.StatusBadge.Tone",
+      "metadata": {"description": "Select a status tone"}
+    }],
+    "renderer": {"version": 1, "steps": [
+      {"op": "fillRoundedRect", "radius": 8, "color": [0.8, 0.3, 0.12], "whenProperty": "Tone", "equals": "\"alert\"", "elseColor": [0.15, 0.55, 0.38]},
+      {"op": "text", "x": 10, "y": 23, "size": 13, "color": [1, 1, 1], "prefix": "Status: ", "property": "Tone"}
+    ]}
+  }]
+}
