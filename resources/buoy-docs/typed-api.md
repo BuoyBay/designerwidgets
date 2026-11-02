@@ -213,8 +213,6 @@ Returns: no value.
 
 Returns: no value.
 
-## DesignerWidgets functions
-
 ### RegisterDesignerWidgets
 
 `Public Sub RegisterDesignerWidgets(catalog As LayoutCatalog)`

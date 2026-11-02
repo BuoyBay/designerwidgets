@@ -38,5 +38,4 @@ The compiled descriptor’s `Tone` property has kind `string`, a quoted default 
 - [Getting started](getting-started.md)
 - [API reference](api.md)
 
-
 [Full typed API: properties, parameters, defaults, and returns](typed-api.md)

@@ -9,7 +9,7 @@ related: ["index.md", "api.md", "typed-api.md"]
 
 # DesignerWidgets getting started
 
-Place the sealed `designerwidgets`, `layoutkit`, and `editorkit` archives in the consumer project’s `packages/` directory. Import `designerwidgets` for its entry module and `layoutkit.LayoutCatalog` for the catalog types. This complete example registers a descriptor and inspects its default width without opening a native window or constructing the badge. The descriptor identity is `designerwidgets.StatusBadge`; layout source spells the control `StatusBadge` and must `Import designerwidgets.DesignerWidgets` for the designer to resolve it.
+Place the sealed `designerwidgets`, `layoutkit`, and `editorkit` archives in the consumer project’s `packages/` directory. `Import designerwidgets` for its entry module and `layoutkit.LayoutCatalog` for the catalog types. This complete example registers a descriptor and inspects its default width without opening a native window or constructing the badge. The descriptor identity is `designerwidgets.StatusBadge`; layout source spells the control `StatusBadge` and must `Import designerwidgets.DesignerWidgets` for the designer to resolve it.
 
 When combining data-only discovery with compiled registration, call `LayoutDiscovery.DiscoverDirectory` or `LoadIndex` first, then `RegisterDesignerWidgets(catalog)`, then load the layout snapshot. Discovery after compiled registration rejects the duplicate control symbol.
 
@@ -17,7 +17,7 @@ For an editing host, pass the populated catalog to the LayoutCanvas editor befor
 
 The reusable `BadgeToneView` replaces its current expression and commit host on `RebindProperty`. Hosts from an older snapshot must stay expired; the View must not retain them as active callbacks. Unknown source expressions remain source text rather than becoming an arbitrary native choice.
 
-```buoy
+```basic
 Import designerwidgets
 Import layoutkit.LayoutCatalog
 

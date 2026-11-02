@@ -34,5 +34,3 @@ It also shows how a package supplies its own palette icon:
 See [the demo](https://github.com/BuoyBay/layoutkit/blob/main/examples/layout_designer_demo.bui) and the
 [LayoutKit catalog](https://github.com/BuoyBay/layoutkit/blob/main/docs/API.md) for the extension contracts.
 This package is an example, not an automatically discovered plugin registry.
-
-Test suites and fixtures are maintainer-local and are not part of this public repository.

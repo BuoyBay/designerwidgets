@@ -1,6 +1,6 @@
-# Reusable controls and renderers for layout designers
+# Canvas-based status badge, design renderer and tone editor registered with the layout catalog
 
-A small compiled extension demonstrating third-party LayoutKit registration.
+A small compiled extension demonstrating third-party LayoutKit registration of a Canvas-based StatusBadge.
 Install `designerwidgets` with `layoutkit` and `editorkit`, import
 `designerwidgets`, then call `RegisterDesignerWidgets(catalog)` explicitly in the
 host before loading its source document.
@@ -33,7 +33,7 @@ BPM also resolves `layoutkit`.
 
 ## Example
 
-```buoy
+```basic
 Import designerwidgets
 Import layoutkit.LayoutCatalog
 
@@ -61,7 +61,6 @@ On your own machine, install Buoy and run:
 buoy ai init --both
 ```
 
-The generated agent files and editor settings stay local and are ignored by Git.
 
 ## Contributing
 
