@@ -1,4 +1,4 @@
-# Canvas StatusBadge + tone editor for the layout catalog
+# Canvas StatusBadge for layouts
 
 A small compiled extension demonstrating third-party LayoutKit registration of a Canvas-based StatusBadge.
 Install `designerwidgets` with `layoutkit` and `editorkit`, import

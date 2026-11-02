@@ -2,5 +2,5 @@
   "schema": 1,
   "name": "designerwidgets",
   "version": "0.1.0",
-  "description": "Canvas StatusBadge + tone editor for the layout catalog"
+  "description": "Canvas StatusBadge for layouts"
 }
